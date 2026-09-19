@@ -23,15 +23,10 @@ use utils::*;
 
 use crate::avcc::AvccConverter;
 
-
 const VIDEO_TIMESCALE: u32 = 90_000;
-const BUF_WRITER_CAPACITY: usize = 1024 * 1024; // 1 MB
+const BUF_WRITER_CAPACITY: usize = 1024 * 1024;
 
-
-pub struct RecordConfig {
-    pub fps: u32,
-    pub filename: String,
-}
+pub struct RecordConfig { pub fps: u32, pub filename: String }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
 
@@ -40,18 +35,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         return Ok(());
     }
 
-    let config = RecordConfig {
-        fps: 30,
-        filename: "record".to_string(),
-    };
+    let config = RecordConfig { fps: 30, filename: "record".to_string() };
 
     let running = Arc::new(AtomicBool::new(true));
     let running_clone = running.clone();
 
-    // Il thread riceve solo la configurazione e il flag atomico
     let handle = thread::spawn(move || record_worker(config, running_clone));
 
-    println!("Registrazione avviata. Premere Invio per fermare...");
+    println!("Record started.");
 
     let mut input = String::new();
     std::io::stdin().read_line(&mut input)?;
@@ -59,7 +50,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     running.store(false, Ordering::Relaxed);
     let _ = handle.join();
 
-    println!("Registrazione completata.");
+    println!("Record finished.");
     Ok(())
 }
 
@@ -116,7 +107,6 @@ fn record_worker(config: RecordConfig, running: Arc<AtomicBool>) -> Result<(), B
     let start_time = Instant::now();
     let mut last_frame_ticks: u64 = 0;
 
-    // 2. Ciclo di acquisizione
     while running.load(Ordering::Relaxed) {
 
         if let Ok(Frame::BGRA(frame)) = capturer.get_next_frame() {
@@ -152,8 +142,8 @@ fn record_worker(config: RecordConfig, running: Arc<AtomicBool>) -> Result<(), B
                     timescale: VIDEO_TIMESCALE,
                     language: "und".to_string(),
                     media_conf: mp4::MediaConfig::AvcConfig(mp4::AvcConfig {
-                        width: width,
-                        height: height,
+                        width,
+                        height,
                         seq_param_set: sps,
                         pic_param_set: pps,
                     }),
@@ -175,7 +165,7 @@ fn record_worker(config: RecordConfig, running: Arc<AtomicBool>) -> Result<(), B
             last_frame_ticks = current_ticks;
 
             frame_count += 1;
-            print!("\rFrame acquisiti e codificati: {}", frame_count);
+            print!("\rFrames: {}", frame_count);
             std::io::Write::flush(&mut std::io::stdout()).ok();
         } else {
             thread::sleep(Duration::from_millis(1));
@@ -185,6 +175,6 @@ fn record_worker(config: RecordConfig, running: Arc<AtomicBool>) -> Result<(), B
     capturer.stop_capture();
     mp4_writer.write_end()?;
 
-    println!("\nTempo totale: {:.2?}", start_time.elapsed());
+    println!("\nTime: {:.2?}", start_time.elapsed());
     Ok(())
 }
