@@ -1,0 +1,11 @@
+[package]
+name = "screenrecorder-rs"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+bytes = "1.12.1"
+mp4 = "0.14.0"
+openh264 = "0.9.8"
+scap = "0.0.8"
+yuvutils-rs = "0.4"
