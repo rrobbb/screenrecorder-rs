@@ -1047,6 +1047,7 @@ dependencies = [
 name = "screenrecorder-rs"
 version = "0.1.0"
 dependencies = [
+ "apple-cf",
  "bytes",
  "crossbeam-channel",
  "mp4",
@@ -1305,6 +1306,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6f8f3378ed7733c6e7d318121d97363c8b0c86161f9579afada473b9a5563b98"
 dependencies = [
  "apple-cf",
+ "doom-fish-utils",
 ]
 
 [[package]]

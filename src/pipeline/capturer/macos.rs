@@ -1,5 +1,4 @@
-use scap::capturer::Capturer;
-use scap::engine::mac::PixelBuffer;
+use scap::{capturer::Capturer, engine::mac::PixelBuffer};
 
 use std::time::Instant;
 
@@ -18,6 +17,7 @@ pub fn get_next_frame(capturer: &mut Capturer, start_time: Instant) -> Option<Ra
     if expected_bytes == 0 { return None }
 
     let timestamp_ticks = get_timestamp_ticks(start_time);
+
     let data = RawFrameData::PixelBuffer(pixel_buffer);
 
     Some(RawFrame { data, width, height, timestamp_ticks })

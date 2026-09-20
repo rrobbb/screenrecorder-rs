@@ -15,7 +15,6 @@ pub fn encode_worker(rx: Receiver<RawFrame>, tx: Sender<EncodedFrame>) -> Result
         if let Some(encoded_frame) = encoder.encode(raw_frame) {
 
             if tx.send(encoded_frame).is_err() { break }
-
         }
     }
 

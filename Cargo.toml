@@ -4,10 +4,11 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+apple-cf = "0.10.0"
 bytes = "1.12.1"
 crossbeam-channel = "0.5.17"
 mp4 = "0.14.0"
 openh264 = "0.9.8"
 scap = "0.0.8"
-videotoolbox = "0.20.0"
+videotoolbox = { version = "0.20.0", features = ["async"] }
 yuvutils-rs = "0.4"

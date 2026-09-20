@@ -51,9 +51,7 @@ impl SoftwareEncoder {
 
         self.converter.convert(&self.h264_buffer);
 
-        if self.converter.avcc_data.is_empty() {
-            return None;
-        }
+        if self.converter.avcc_data.is_empty() { return None }
 
         Some(EncodedFrame {
             data: self.converter.take_avcc_data(),
