@@ -1,16 +1,15 @@
 use yuvutils_rs::{bgra_to_yuv420, YuvRange, YuvStandardMatrix};
-
 use openh264::formats::YUVSource;
 
-// Needed to convert a BGRA frame into a YUV frame
-// H264 encoding needs a YUV frame
+/// Needed to convert a BGRA frame into a YUV frame
+/// H264 encoding needs a YUV frame
 
 pub struct YUVBuffer {
-    pub y: Vec<u8>,
-    pub u: Vec<u8>,
-    pub v: Vec<u8>,
-    pub width: usize,
-    pub height: usize,
+    y: Vec<u8>,
+    u: Vec<u8>,
+    v: Vec<u8>,
+    width: usize,
+    height: usize,
 }
 
 impl YUVBuffer {
@@ -25,7 +24,7 @@ impl YUVBuffer {
     }
 
     /// Converts BGRA to YUV420p using CPU SIMD without allocating new memory
-    pub fn from_bgra(&mut self, bgra: &[u8]) {
+    pub fn from_bgra(&mut self, bgra: &[u8], bgra_stride: usize) {
         bgra_to_yuv420(
             &mut self.y,
             self.width as u32,
@@ -34,7 +33,7 @@ impl YUVBuffer {
             &mut self.v,
             (self.width / 2) as u32,
             bgra,
-            (self.width * 4) as u32,
+            bgra_stride as u32,
             self.width as u32,
             self.height as u32,
             YuvRange::Full,

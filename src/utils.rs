@@ -12,7 +12,7 @@ pub fn can_record() -> Result<(), String> {
     Ok(())
 }
 
-pub fn detect_h264_format(data: &[u8]) -> &'static str {
+pub fn _detect_h264_format(data: &[u8]) -> &'static str {
 
     if data.len() >= 4 && data[0..4] == [0, 0, 0, 1] { return "Annex B (4-byte start code)" }
 

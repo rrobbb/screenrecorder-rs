@@ -5,7 +5,9 @@ edition = "2024"
 
 [dependencies]
 bytes = "1.12.1"
+crossbeam-channel = "0.5.17"
 mp4 = "0.14.0"
 openh264 = "0.9.8"
 scap = "0.0.8"
+videotoolbox = "0.20.0"
 yuvutils-rs = "0.4"
