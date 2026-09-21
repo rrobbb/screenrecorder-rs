@@ -53,6 +53,8 @@ pub fn writer_worker(config: RecordConfig, rx: Receiver<EncodedFrame>) -> Result
         media_conf: MediaConfig::AvcConfig(mp4::AvcConfig::default())
     };
 
+    println!("Writer worker started.");
+
     while let Ok(encoded_frame) = rx.recv() {
 
         let (width, height) = encoded_frame.dimensions();

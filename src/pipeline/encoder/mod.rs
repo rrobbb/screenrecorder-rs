@@ -1,4 +1,5 @@
 mod software;
+mod macos;
 
 use software::SoftwareEncoder;
 
@@ -6,9 +7,11 @@ use crossbeam_channel::{Sender, Receiver};
 
 use super::{RawFrame, EncodedFrame};
 
-pub fn encode_worker(rx: Receiver<RawFrame>, tx: Sender<EncodedFrame>) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+pub fn encode_worker(fps: f32, rx: Receiver<RawFrame>, tx: Sender<EncodedFrame>) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 
-    let mut encoder = SoftwareEncoder::new()?;
+    let mut encoder = SoftwareEncoder::new(fps)?;
+
+    println!("Using software encoding.");
 
     while let Ok(raw_frame) = rx.recv() {
 

@@ -6,8 +6,7 @@
 
 use crossbeam_channel::Sender;
 
-use scap::capturer::{Capturer, Options, Resolution};
-use scap::frame::FrameType;
+use scap::{capturer::{Capturer, Options, Resolution}, frame::FrameType};
 
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
@@ -19,11 +18,13 @@ use super::{RawFrame, RawFrameData};
 
 pub fn capture_worker(fps: u32, tx: Sender<RawFrame>, running: Arc<AtomicBool>) {
 
-    let mut capturer = create_capturer(fps, Resolution::_1080p);
+    let mut capturer = create_capturer(fps, Resolution::_720p);
 
     capturer.start_capture();
 
     let start_time = Instant::now();
+
+    println!("Capture worker started.");
 
     while running.load(Ordering::Relaxed) {
 

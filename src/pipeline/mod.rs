@@ -6,6 +6,9 @@ use std::thread;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 
+// #[cfg(target_os = "macos")]
+// use apple_cf::cv::CVPixelBuffer;
+//
 use crossbeam_channel::bounded;
 
 use crate::config::RecordConfig;
@@ -57,7 +60,8 @@ pub fn record_pipeline(config: RecordConfig, running: Arc<AtomicBool>) -> Result
     let running_capture = running.clone();
 
     let capture_handle = thread::spawn(move || capture_worker(config.fps, capture_tx, running_capture));
-    let encode_handle = thread::spawn(move || encode_worker(capture_rx, encode_tx));
+
+    let encode_handle = thread::spawn(move || encode_worker(config.fps as f32, capture_rx, encode_tx));
 
     let writer_result = writer_worker(config, encode_rx);
 

@@ -6,5 +6,5 @@ pub struct RecordConfig { pub fps: u32, pub filename: String }
 
 impl Default for RecordConfig {
 
-    fn default() -> Self { RecordConfig { fps: 60, filename: "record".to_string() } }
+    fn default() -> Self { RecordConfig { fps: 30, filename: "record".to_string() } }
 }
