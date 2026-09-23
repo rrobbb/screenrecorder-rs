@@ -1,5 +1,4 @@
-use scap::capturer::Capturer;
-use scap::frame::Frame;
+use scap::{capturer::Capturer, frame::Frame};
 
 use std::time::Instant;
 

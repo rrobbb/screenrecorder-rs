@@ -1,16 +1,12 @@
-mod utils;
 mod yuv;
 mod avcc;
 mod pipeline;
-mod config;
 
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::thread;
 
-use utils::*;
-use config::RecordConfig;
-use pipeline::record_pipeline;
+use pipeline::{record_pipeline, RecordConfig};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
 
@@ -35,6 +31,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     running.store(false, Ordering::Relaxed);
 
     let _ = handle.join();
+
+    Ok(())
+}
+
+pub fn can_record() -> Result<(), String> {
+
+    if !scap::is_supported() { return Err("Platform not supported.".to_string()); }
+
+    if !scap::has_permission() {
+        println!("Requesting permission...");
+        if !scap::request_permission() {
+            return Err("Permission denied.".to_string());
+        }
+    }
 
     Ok(())
 }

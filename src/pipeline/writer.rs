@@ -1,3 +1,4 @@
+use anyhow::Context;
 use mp4::{Mp4Config, Mp4Sample, Mp4Writer, MediaConfig, TrackConfig, TrackType};
 
 use std::fs::File;
@@ -8,10 +9,9 @@ use crossbeam_channel::Receiver;
 
 use bytes::Bytes;
 
-use super::EncodedFrame;
-use crate::config::{RecordConfig, BUF_WRITER_CAPACITY, VIDEO_TIMESCALE};
+use super::{EncodedFrame, RecordConfig, BUF_WRITER_CAPACITY, VIDEO_TIMESCALE};
 
-fn create_mp4_writer(filename: &str) -> Mp4Writer<BufWriter<File>> {
+fn create_mp4_writer(filename: &str) -> anyhow::Result<Mp4Writer<BufWriter<File>>> {
 
     let path = format!("{}.mp4", filename);
 
@@ -30,19 +30,18 @@ fn create_mp4_writer(filename: &str) -> Mp4Writer<BufWriter<File>> {
         timescale: VIDEO_TIMESCALE
     };
 
-    Mp4Writer::write_start(writer, &mp4_config).expect("Unable to initialize MP4 Writer.")
+    Mp4Writer::write_start(writer, &mp4_config).context("Unable to initialize MP4 Writer.")
 }
 
-pub fn writer_worker(config: RecordConfig, rx: Receiver<EncodedFrame>) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+pub fn writer_worker(config: RecordConfig, rx: Receiver<EncodedFrame>) -> anyhow::Result<()> {
 
-    let mut mp4_writer = create_mp4_writer(&config.filename);
+    let mut mp4_writer = create_mp4_writer(&config.filename)?;
 
     let mut track_added = false;
     let track_id: u32 = 1;
 
     let fallback_duration = VIDEO_TIMESCALE / config.fps;
     let mut last_frame_ticks = 0u64;
-    // let mut frame_count = 0u64;
 
     let start_time = Instant::now();
 
@@ -93,7 +92,6 @@ pub fn writer_worker(config: RecordConfig, rx: Receiver<EncodedFrame>) -> Result
         mp4_writer.write_sample(track_id, &sample)?;
 
         last_frame_ticks = current_ticks;
-        // frame_count += 1;
     }
 
     mp4_writer.write_end()?;

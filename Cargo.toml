@@ -13,12 +13,10 @@ codegen-units = 1      # Genera codice binario più compatto e veloce
 panic = "abort"        # Rimuove le tabelle di unwinding
 
 [dependencies]
-apple-cf = "0.10.0"
+anyhow = "1.0.104"
 bytes = "1.12.1"
 crossbeam-channel = "0.5.17"
 mp4 = "0.14.0"
 openh264 = "0.9.8"
 scap = "0.0.8"
-screencapturekit-sys = "0.2.8"
-videotoolbox = { version = "0.20.0", features = ["async"] }
 yuvutils-rs = "0.4"

@@ -4,21 +4,19 @@
 #[cfg(target_os = "macos")] mod macos;
 #[cfg(target_os = "macos")] use macos::get_next_frame;
 
+use anyhow::Context;
 use crossbeam_channel::Sender;
 
 use scap::{capturer::{Capturer, Options, Resolution}, frame::FrameType};
 
-use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::Arc;
+use std::sync::{atomic::{AtomicBool, Ordering}, Arc};
 use std::time::{Duration, Instant};
-use std::thread;
 
-use crate::config::VIDEO_TIMESCALE;
-use super::{RawFrame, RawFrameData};
+use super::{RawFrame, RawFrameData, VIDEO_TIMESCALE};
 
-pub fn capture_worker(fps: u32, tx: Sender<RawFrame>, running: Arc<AtomicBool>) {
+pub fn capture_worker(fps: u32, tx: Sender<RawFrame>, running: Arc<AtomicBool>) -> anyhow::Result<()> {
 
-    let mut capturer = create_capturer(fps, Resolution::_720p);
+    let mut capturer = create_capturer(fps, Resolution::_1080p)?;
 
     capturer.start_capture();
 
@@ -32,19 +30,21 @@ pub fn capture_worker(fps: u32, tx: Sender<RawFrame>, running: Arc<AtomicBool>) 
 
             if tx.send(raw_frame).is_err() { break }
 
-        } else { thread::sleep(Duration::from_millis(1)); }
+        } else { std::thread::sleep(Duration::from_millis(1)); }
     }
 
     capturer.stop_capture();
+
+    anyhow::Ok(())
 }
 
-fn create_capturer(fps: u32, output_resolution: Resolution) -> Capturer {
+fn create_capturer(fps: u32, output_resolution: Resolution) -> anyhow::Result<Capturer> {
 
     let output_type = FrameType::BGRAFrame;
 
     let options = Options { fps, show_cursor: true, output_type, output_resolution, ..Default::default() };
 
-    Capturer::build(options).expect("Unable to create the capturer.")
+    Capturer::build(options).context("Unable to create the capturer.")
 }
 
 pub fn get_timestamp_ticks(start_time: Instant) -> u64 {

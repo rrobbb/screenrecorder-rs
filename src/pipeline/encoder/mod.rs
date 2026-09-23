@@ -1,17 +1,14 @@
 mod software;
-mod macos;
 
-use software::SoftwareEncoder;
+use software::OpenH264Encoder;
 
 use crossbeam_channel::{Sender, Receiver};
 
 use super::{RawFrame, EncodedFrame};
 
-pub fn encode_worker(fps: f32, rx: Receiver<RawFrame>, tx: Sender<EncodedFrame>) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+pub fn encode_worker(fps: f32, rx: Receiver<RawFrame>, tx: Sender<EncodedFrame>) -> anyhow::Result<()> {
 
-    let mut encoder = SoftwareEncoder::new(fps)?;
-
-    println!("Using software encoding.");
+    let mut encoder = OpenH264Encoder::new(fps)?;
 
     while let Ok(raw_frame) = rx.recv() {
 
