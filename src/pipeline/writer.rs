@@ -9,24 +9,22 @@ use crossbeam_channel::Receiver;
 
 use bytes::Bytes;
 
-use super::{EncodedFrame, RecordConfig, BUF_WRITER_CAPACITY, VIDEO_TIMESCALE};
+use super::{EncodedFrame, RecordConfig, VIDEO_TIMESCALE};
+
+const BUF_WRITER_CAPACITY: usize = 1024 * 1024;
 
 fn create_mp4_writer(filename: &str) -> anyhow::Result<Mp4Writer<BufWriter<File>>> {
 
-    let path = format!("{}.mp4", filename);
+    let path = format!("{filename}.mp4");
 
-    let file = File::create(&path).expect("Unable to create the file.");
+    let file = File::create(&path)?;
 
     let writer = BufWriter::with_capacity(BUF_WRITER_CAPACITY, file);
 
     let mp4_config = Mp4Config {
-        major_brand: str::parse("isom").unwrap(),
+        major_brand: "isom".parse()?,
         minor_version: 512,
-        compatible_brands: vec![
-            str::parse("isom").unwrap(),
-            str::parse("iso2").unwrap(),
-            str::parse("mp41").unwrap(),
-        ],
+        compatible_brands: vec!["isom".parse()?, "iso2".parse()?, "mp41".parse()?],
         timescale: VIDEO_TIMESCALE
     };
 
@@ -56,7 +54,8 @@ pub fn writer_worker(config: RecordConfig, rx: Receiver<EncodedFrame>) -> anyhow
 
     while let Ok(encoded_frame) = rx.recv() {
 
-        let (width, height) = encoded_frame.dimensions();
+        let width = encoded_frame.width as u16;
+        let height = encoded_frame.height as u16;
         let current_ticks = encoded_frame.timestamp_ticks;
 
         if !track_added {

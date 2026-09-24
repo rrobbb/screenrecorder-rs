@@ -14,9 +14,9 @@ use std::time::{Duration, Instant};
 
 use super::{RawFrame, RawFrameData, VIDEO_TIMESCALE};
 
-pub fn capture_worker(fps: u32, tx: Sender<RawFrame>, running: Arc<AtomicBool>) -> anyhow::Result<()> {
+pub fn capture_worker(fps: u32, resolution: Resolution, tx: Sender<RawFrame>, running: Arc<AtomicBool>) -> anyhow::Result<()> {
 
-    let mut capturer = create_capturer(fps, Resolution::_1080p)?;
+    let mut capturer = create_capturer(fps, resolution)?;
 
     capturer.start_capture();
 

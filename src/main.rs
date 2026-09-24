@@ -15,7 +15,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         return Ok(());
     }
 
-    let config = RecordConfig::default();
+    let config = RecordConfig::_1080p30("record".to_string());
     let running = Arc::new(AtomicBool::new(true));
 
     let running_clone = running.clone();

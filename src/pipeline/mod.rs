@@ -2,11 +2,11 @@ mod capturer;
 mod encoder;
 mod writer;
 
-use std::sync::{atomic::{AtomicBool, Ordering}, Arc};
-use std::thread;
+use std::{thread, sync::{atomic::{AtomicBool, Ordering}, Arc}};
 
 use anyhow::anyhow;
 use crossbeam_channel::bounded;
+use scap::capturer::Resolution;
 
 use capturer::capture_worker;
 use encoder::encode_worker;
@@ -25,17 +25,14 @@ pub enum RawFrameData {
 }
 
 pub const VIDEO_TIMESCALE: u32 = 90_000;
-pub const BUF_WRITER_CAPACITY: usize = 1024 * 1024;
 
-pub struct RawFrame { data: RawFrameData, width: u16, height: u16, pub timestamp_ticks: u64 }
+pub struct RawFrame { data: RawFrameData, pub width: usize, pub height: usize, pub timestamp_ticks: u64 }
 
 impl RawFrame {
 
-    #[inline] pub fn dimensions(&self) -> (u16, u16) { (self.width, self.height) }
-
     pub fn convert_to_yuv(&self, yuv_buffer: &mut YUVBuffer) {
 
-        yuv_buffer.resize(self.width as usize, self.height as usize);
+        yuv_buffer.resize(self.width, self.height);
 
         match &self.data {
 
@@ -43,32 +40,33 @@ impl RawFrame {
             RawFrameData::PixelBuffer(pb) => yuv_buffer.from_bgra(&*pb.data(), pb.bytes_per_row()),
 
             #[cfg(not(target_os = "macos"))]
-            RawFrameData::Owned(data) => yuv_buffer.from_bgra(data, self.width as usize * 4)
+            RawFrameData::Owned(data) => yuv_buffer.from_bgra(data, self.width * 4)
         }
     }
 }
 
 pub struct EncodedFrame {
     pub data: Vec<u8>,
-    pub width: u16,
-    pub height: u16,
+    pub width: usize,
+    pub height: usize,
     pub timestamp_ticks: u64,
     pub is_keyframe: bool,
     pub sps: Option<Vec<u8>>,
     pub pps: Option<Vec<u8>>,
 }
 
-impl EncodedFrame {
-
-    #[inline] pub fn dimensions(&self) -> (u16, u16) { (self.width, self.height) }
-}
-
 #[derive(Debug, Clone)]
-pub struct RecordConfig { pub fps: u32, pub filename: String }
+pub struct RecordConfig { pub fps: u32, pub resolution: Resolution, pub filename: String }
 
-impl Default for RecordConfig {
+impl RecordConfig {
 
-    fn default() -> Self { RecordConfig { fps: 60, filename: "record".to_string() } }
+    pub fn _720p30(filename: String) -> Self { Self { fps: 30, resolution: Resolution::_720p, filename } }
+
+    pub fn _720p60(filename: String) -> Self { Self { fps: 60, resolution: Resolution::_720p, filename } }
+
+    pub fn _1080p30(filename: String) -> Self { Self { fps: 30, resolution: Resolution::_1080p, filename } }
+
+    pub fn _1080p60(filename: String) -> Self { Self { fps: 60, resolution: Resolution::_1080p, filename } }
 }
 
 struct AutoStopGuard(Arc<AtomicBool>);
@@ -86,12 +84,10 @@ pub fn record_pipeline(config: RecordConfig, running: Arc<AtomicBool>) -> anyhow
 
     let _guard = AutoStopGuard(running.clone());
 
-    let capture_fps = config.fps;
     let running_capture = running.clone();
-    let capture_handle = thread::spawn(move || capture_worker(capture_fps, capture_tx, running_capture));
+    let capture_handle = thread::spawn(move || capture_worker(config.fps, config.resolution, capture_tx, running_capture));
 
-    let encode_fps = config.fps as f32;
-    let encode_handle = thread::spawn(move || encode_worker(encode_fps, capture_rx, encode_tx));
+    let encode_handle = thread::spawn(move || encode_worker(config.fps as f32, capture_rx, encode_tx));
 
     let writer_result = writer_worker(config, encode_rx);
 
@@ -99,11 +95,11 @@ pub fn record_pipeline(config: RecordConfig, running: Arc<AtomicBool>) -> anyhow
 
     let encode_result = encode_handle
         .join()
-        .map_err(|_| anyhow!("Il thread di Encoding è andato in panico"))?;
+        .map_err(|_| anyhow!("Encode thread panicked."))?;
 
     let capture_result = capture_handle
         .join()
-        .map_err(|_| anyhow!("Il thread di Cattura è andato in panico"))?;
+        .map_err(|_| anyhow!("Capture thread panicked."))?;
 
     capture_result?;
     encode_result?;

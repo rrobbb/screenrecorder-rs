@@ -5,14 +5,12 @@ use openh264::formats::YUVSource;
 
 pub struct YUVBuffer { y: Vec<u8>, u: Vec<u8>, v: Vec<u8>, width: usize, height: usize }
 
+impl Default for YUVBuffer {
+
+    fn default() -> Self { Self { y: vec![0], u: vec![0], v: vec![0], width: 0, height: 0 } }
+}
+
 impl YUVBuffer {
-
-    pub fn new(width: usize, height: usize) -> Self {
-
-        let (y_size, uv_size) = get_y_and_uv_size(width, height);
-
-        Self { y: vec![0; y_size], u: vec![0; uv_size], v: vec![0; uv_size], width, height }
-    }
 
     /// Converts BGRA to YUV420p using CPU SIMD without allocating new memory
     pub fn from_bgra(&mut self, bgra: &[u8], bgra_stride: usize) {
