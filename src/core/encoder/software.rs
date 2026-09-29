@@ -2,7 +2,7 @@ use anyhow::Context;
 
 use openh264::{OpenH264API, encoder::{BitRate, Encoder, EncoderConfig, FrameRate, RateControlMode, UsageType}};
 
-use crate::{avcc::AvccConverter, pipeline::{EncodedFrame, RawFrame}, yuv::YUVBuffer};
+use crate::{avcc::AvccConverter, core::{EncodedFrame, RawFrame}, yuv::YUVBuffer};
 
 pub struct OpenH264Encoder {
     encoder: Encoder,
@@ -60,9 +60,9 @@ fn create_encoder(fps: f32) -> anyhow::Result<Encoder> {
         .usage_type(UsageType::ScreenContentRealTime)
         .max_frame_rate(FrameRate::from_hz(fps))
         .rate_control_mode(RateControlMode::Quality)
-        .bitrate(BitRate::from_bps(8_000_000));
+        .bitrate(BitRate::from_bps(5_000_000));
 
     let api = OpenH264API::from_source();
 
-    Encoder::with_api_config(api, config).context("Unable to initizialize the encoder.")
+    Encoder::with_api_config(api, config).context("Unable to initialize the encoder.")
 }

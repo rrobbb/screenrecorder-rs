@@ -1,10 +1,8 @@
 use scap::capturer::Capturer;
 
-use std::time::Instant;
-
 use super::{RawFrame, RawFrameData, get_timestamp_ticks};
 
-pub fn get_next_frame(capturer: &mut Capturer, start_time: Instant) -> Option<RawFrame> {
+pub fn get_next_frame(capturer: &mut Capturer, start_time: std::time::Instant) -> Option<RawFrame> {
 
     let pixel_buffer = capturer.raw().get_next_pixel_buffer().ok()?;
 

@@ -60,13 +60,17 @@ pub struct RecordConfig { pub fps: u32, pub resolution: Resolution, pub filename
 
 impl RecordConfig {
 
-    pub fn _720p30(filename: String) -> Self { Self { fps: 30, resolution: Resolution::_720p, filename } }
+    pub fn _720p30(filename: &str) -> Self { Self { fps: 30, resolution: Resolution::_720p, filename: filename.to_string() } }
 
-    pub fn _720p60(filename: String) -> Self { Self { fps: 60, resolution: Resolution::_720p, filename } }
+    pub fn _720p60(filename: &str) -> Self { Self { fps: 60, resolution: Resolution::_720p, filename: filename.to_string() } }
 
-    pub fn _1080p30(filename: String) -> Self { Self { fps: 30, resolution: Resolution::_1080p, filename } }
+    pub fn _1080p30(filename: &str) -> Self { Self { fps: 30, resolution: Resolution::_1080p, filename: filename.to_string() } }
 
-    pub fn _1080p60(filename: String) -> Self { Self { fps: 60, resolution: Resolution::_1080p, filename } }
+    pub fn _1080p60(filename: &str) -> Self { Self { fps: 60, resolution: Resolution::_1080p, filename: filename.to_string() } }
+
+    pub fn native30(filename: &str) -> Self { Self { fps: 30, resolution: Resolution::Captured, filename: filename.to_string() }}
+
+    pub fn native60(filename: &str) -> Self { Self { fps: 60, resolution: Resolution::Captured, filename: filename.to_string() }}
 }
 
 struct AutoStopGuard(Arc<AtomicBool>);
@@ -80,7 +84,7 @@ pub fn record_pipeline(config: RecordConfig, running: Arc<AtomicBool>) -> anyhow
 
     let (capture_tx, capture_rx) = bounded(2);
 
-    let (encode_tx, encode_rx) = bounded(30);
+    let (encode_tx, encode_rx) = bounded(4);
 
     let _guard = AutoStopGuard(running.clone());
 
