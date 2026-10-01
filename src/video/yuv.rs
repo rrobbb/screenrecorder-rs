@@ -1,8 +1,6 @@
 use yuvutils_rs::{bgra_to_yuv420, YuvRange, YuvStandardMatrix};
 use openh264::formats::YUVSource;
 
-/// Converts a BGRA frame into a YUV frame
-
 pub struct YUVBuffer { y: Vec<u8>, u: Vec<u8>, v: Vec<u8>, width: usize, height: usize }
 
 impl Default for YUVBuffer {
@@ -62,7 +60,6 @@ impl YUVSource for YUVBuffer {
 fn get_y_and_uv_size(width: usize, height: usize) -> (usize, usize) {
 
     let y_size = width * height;
-    let uv_size = y_size / 4;
 
-    (y_size, uv_size)
+    (y_size, y_size / 4)
 }

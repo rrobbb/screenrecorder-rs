@@ -1,6 +1,5 @@
-mod yuv;
-mod avcc;
-mod core;
+mod video;
+mod container;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
 
@@ -9,13 +8,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         return Ok(());
     }
 
-    let config = core::RecordConfig::native30("record");
+    let config = video::config::RecordConfig::native30("record");
 
     let running = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(true));
 
     let running_clone = running.clone();
 
-    let handle = std::thread::spawn(move || core::record_pipeline(config, running_clone));
+    let handle = std::thread::spawn(move || video::record_pipeline(config, running_clone));
 
     println!("Record started.");
 
@@ -30,14 +29,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-pub fn can_record() -> Result<(), String> {
+pub fn can_record() -> Result<(), &'static str> {
 
-    if !scap::is_supported() { return Err("Platform not supported.".to_string()); }
+    if !scap::is_supported() { return Err("Platform not supported."); }
 
     if !scap::has_permission() {
         println!("Requesting permission...");
         if !scap::request_permission() {
-            return Err("Permission denied.".to_string());
+            return Err("Permission not granted.");
         }
     }
 

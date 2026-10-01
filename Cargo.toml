@@ -8,9 +8,9 @@ rustflags = ["-C", "target-cpu=native"]
 
 [profile.release]
 opt-level = 3
-lto = "fat"            # Ottimizza l'inlining tra diverse crate (inclusi i binding C)
-codegen-units = 1      # Genera codice binario più compatto e veloce
-panic = "abort"        # Rimuove le tabelle di unwinding
+lto = "fat"
+codegen-units = 1
+panic = "abort"
 
 [dependencies]
 anyhow = "1.0.104"

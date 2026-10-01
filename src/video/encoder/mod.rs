@@ -1,12 +1,12 @@
-mod software;
+mod openh264;
 
-use software::OpenH264Encoder;
+use openh264::OpenH264Encoder;
 
 use crossbeam_channel::{Sender, Receiver};
 
-use super::{RawFrame, EncodedFrame};
+use super::frame::{RawFrame, EncodedFrame};
 
-pub fn encode_worker(fps: f32, rx: Receiver<RawFrame>, tx: Sender<EncodedFrame>) -> anyhow::Result<()> {
+pub fn worker(fps: f32, rx: Receiver<RawFrame>, tx: Sender<EncodedFrame>) -> anyhow::Result<()> {
 
     let mut encoder = OpenH264Encoder::new(fps)?;
 

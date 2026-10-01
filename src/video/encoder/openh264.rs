@@ -2,7 +2,7 @@ use anyhow::Context;
 
 use openh264::{OpenH264API, encoder::{BitRate, Encoder, EncoderConfig, FrameRate, RateControlMode, UsageType}};
 
-use crate::{avcc::AvccConverter, core::{EncodedFrame, RawFrame}, yuv::YUVBuffer};
+use crate::video::{avcc::AvccConverter, yuv::YUVBuffer, frame::{EncodedFrame, RawFrame}};
 
 pub struct OpenH264Encoder {
     encoder: Encoder,
@@ -44,7 +44,7 @@ impl OpenH264Encoder {
 
         let is_keyframe = matches!(bitstream.frame_type(), openh264::encoder::FrameType::IDR);
 
-        if self.converter.avcc_data.is_empty() { return None }
+        if self.converter.is_empty() { return None }
 
         let data = self.converter.take_avcc_data();
         let sps = self.converter.take_sps();

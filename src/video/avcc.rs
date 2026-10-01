@@ -1,16 +1,10 @@
-pub struct AvccConverter { pub avcc_data: Vec<u8>, sps: Option<Vec<u8>>, pps: Option<Vec<u8>> }
+pub struct AvccConverter { avcc_data: Vec<u8>, sps: Option<Vec<u8>>, pps: Option<Vec<u8>> }
 
 impl AvccConverter {
 
     const BUFFER_CAPACITY: usize = 256 * 1024;
 
-    pub fn new() -> Self {
-        Self {
-            avcc_data: Vec::with_capacity(Self::BUFFER_CAPACITY),
-            sps: None,
-            pps: None
-        }
-    }
+    pub fn new() -> Self { Self { avcc_data: Vec::with_capacity(Self::BUFFER_CAPACITY), sps: None, pps: None } }
 
     pub fn convert(&mut self, raw_h264: &[u8]) {
 
@@ -70,4 +64,6 @@ impl AvccConverter {
     pub fn take_sps(&mut self) -> Option<Vec<u8>> { self.sps.take() }
 
     pub fn take_pps(&mut self) -> Option<Vec<u8>> { self.pps.take() }
+
+    pub fn is_empty(&self) -> bool { self.avcc_data.is_empty() }
 }
